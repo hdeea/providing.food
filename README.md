@@ -1,18 +1,10 @@
-
-
-## Project info
-
-
-
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
+**Use the Development Environment**
 
-
-Changes made via Lovable will be committed automatically to this repo.
-
+Changes made in the development environment will be reflected in your repository.
 
 Follow these steps:
 
@@ -36,30 +28,26 @@ npm run dev
 - Click the "Edit" button (pencil icon) at the top right of the file view.
 - Make your changes and commit the changes.
 
-**Use GitHub Codespaces**
+**Use a Cloud-Based Editor**
 
 - Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Click on the "Code" button near the top right.
+- Choose the option to open the repository in a cloud-based editing environment.
+- Edit files directly and commit and push your changes once you're done.
 
 ## What technologies are used for this project?
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
+- Vite  
+- TypeScript  
+- React  
+- shadcn-ui  
 - Tailwind CSS
 
-
-
-## Can I connect a custom domain to my Lovable project?
+## Can I connect a custom domain to my project?
 
 Yes, you can!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+To connect a domain, go to your project settings and find the Domains section. From there, you can connect a custom domain by following the step-by-step instructions provided.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -9,10 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
-import { IndividualDonor } from '../../types/FoodBond';
+import { toast } from '@/hooks/use-toast';
 import { Heart, User, Mail, Utensils, MapPin, Search, Camera, LogIn, UserPlus } from 'lucide-react';
 import CreateAccountForm from '../../components/Individual/CreateAccountForm';
+
+import { postDonationIndividual } from '@/api/postDonationIndividual';
+import { DonationIndividualDto } from '@/types/individual';
 
 const donorSchema = z.object({
   foodName: z.string().min(1, 'Food name is required'),
@@ -26,10 +27,13 @@ const donorSchema = z.object({
 type FormData = z.infer<typeof donorSchema>;
 
 const DonorRegistrationPage: React.FC = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // الحالة لإظهار/إخفاء صفحة إنشاء الحساب
   const [showCreateAccount, setShowCreateAccount] = useState(false);
-  const { toast } = useToast();
 
+  // حالة إرسال النموذج
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // حالة فورم الريأكت هوك فورم
   const form = useForm<FormData>({
     resolver: zodResolver(donorSchema),
     defaultValues: {
@@ -42,50 +46,46 @@ const DonorRegistrationPage: React.FC = () => {
     },
   });
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        form.setValue('foodImage', e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  // دالة رفع الصورة وتحويلها إلى Base64
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      form.setValue('foodImage', reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const onSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      const newDonor: IndividualDonor = {
-        id: `DONOR_${Date.now()}`,
-        name: data.userType,
-        email: data.email,
-        phone: '',
-        address: data.address,
-        donationType: 'food',
-        foodDescription: `${data.foodName} ${data.vegetarian ? '(Vegetarian)' : ''}`,
+
+      const payload: DonationIndividualDto = {
+        foodName: data.foodName,
+        userType: data.userType,
+        description: "", // يمكنك إضافة حقل الوصف لاحقًا إذا أردت
+        image: data.foodImage || "",
+        country: data.address,
+        vegetarian: data.vegetarian,
+        userEmail: data.email,
+        id: '', // أو توليد ID حسب ما يناسبك
         status: 'pending',
-        totalDonations: 0,
-        createdAt: new Date().toISOString(),
       };
-      
-      console.log('New donor registered:', newDonor);
-      
-      form.reset();
-      
+
+      await postDonationIndividual(payload);
+
+      form.reset();  // هنا تستخدم reset من useForm
+
       toast({
-        title: "Donation request submitted successfully",
-        description: "Your request has been sent to the association. We will contact you soon after reviewing your request.",
+        title: "تم إرسال طلب التبرع بنجاح",
+        description: "تم إرسال طلبك إلى الجمعية.",
       });
-      
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An error occurred while sending the request. Please try again.",
+        title: "حدث خطأ",
+        description: "حدث خطأ أثناء إرسال الطلب.",
         variant: "destructive",
       });
     } finally {
@@ -133,7 +133,7 @@ const DonorRegistrationPage: React.FC = () => {
           </a>
         </div>
 
-        {/* Account Actions - Fixed login redirect */}
+        {/* Account Actions */}
         <div className="mb-8 flex gap-4 justify-center">
           <Button 
             onClick={() => setShowCreateAccount(true)} 

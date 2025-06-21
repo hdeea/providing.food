@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Badge } from '@/components/ui/badge';
 import { Search, Clock, CheckCircle, XCircle, Heart } from 'lucide-react';
-import { HelpRequest } from '../../types/FoodBond';
 import { formatDateTime } from '../../utils/helpers';
+import { HelpRequest } from '@/types/individual';
 
 const trackSchema = z.object({
   email: z.string().email('البريد الإلكتروني غير صحيح'),

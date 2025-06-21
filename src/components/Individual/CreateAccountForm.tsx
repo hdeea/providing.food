@@ -9,6 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { User, Mail, Phone, Lock } from 'lucide-react';
+import {registerUser} from '../../api/User/register';
+import { CreateAccount } from '@/types/index';
+
 
 const accountSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
@@ -36,35 +39,32 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ onClose }) => {
       phoneNumber: '',
     },
   });
+const onSubmit = async (data: FormData) => {
+  try {
+    setIsSubmitting(true);
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      setIsSubmitting(true);
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      console.log('Account created:', data);
-      
-      form.reset();
-      
-      toast({
-        title: "Account created successfully",
-        description: "Your account has been created. You can now submit donation requests.",
-      });
-      
-      onClose();
-      
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred while creating your account. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    await registerUser(data as CreateAccount);
+
+    form.reset();
+
+    toast({
+      title: "Account created successfully",
+      description: "Your account has been created. You can now submit donation requests.",
+    });
+
+    onClose();
+
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "An error occurred while creating your account. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <Card>

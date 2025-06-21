@@ -1,37 +1,38 @@
-
 // User types
-export interface User {
-  id: string;
-  name: string;
+export interface CreateAccount {
+  fullName: string;
   email: string;
-  role: 'admin' | 'restaurant' | 'beneficiary';
-  password?: string;
+  password: string;
+  phoneNumber: string;
 }
+
 
 // Restaurant types
-export interface Restaurant {
-  id: string;
-  ownerName: string;
-  ownerPhone: string;
-  ownerEmail: string;
-  password?: string;
-  restaurantName: string;
-  restaurantPhone: string;
-  restaurantEmail: string;
-  address: string;
-  category: string;
-  createdAt: string;
+export type Restaurant = {
+  restaurantId(restaurantId: any): void;
+  RestaurantId: number;
+  CategoryId: number;         // رقم الفئة (لو تستخدمين الرقم)
+  CategoryName?: string;      // اسم الفئة (لو تحتاجينه)
+  UserId?: number;
+  RestaurantName: string;
+  RestaurantEmail: string;
+  RestaurantPhone: string;
+  RestaurantAddress: string;
+  UserTypeName: string;
+  FullName: string;
+  Email: string;
+  Password: string;
+  PhoneNumber: string;
+};
+
+export interface Beneficiary {
+  beneficiaryId: number;
+  fullName: string;
+  phoneNumber: string;
+  familySize: number;
+  isActive: boolean;
 }
 
-// Beneficiary types
-export interface Beneficiary {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  address: string;
-  registrationDate: string;
-}
 
 // Donation types
 export interface DonationRequest {

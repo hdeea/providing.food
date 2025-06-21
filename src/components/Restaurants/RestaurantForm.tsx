@@ -24,6 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 
 import { useToast } from '@/hooks/use-toast';
+import { addRestaurant } from '@/api/addRestaurant';
 
 interface RestaurantFormProps {
   isOpen: boolean;
@@ -33,17 +34,19 @@ interface RestaurantFormProps {
 }
 
 const restaurantSchema = z.object({
-  ownerName: z.string().min(1, 'Owner name is required'),
-  ownerPhone: z.string().min(1, 'Owner phone is required'),
-  ownerEmail: z.string().email('Invalid email format'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  restaurantName: z.string().min(1, 'Restaurant name is required'),
-  restaurantPhone: z.string().min(1, 'Restaurant phone is required'),
-  restaurantEmail: z.string().email('Invalid email format'),
-  address: z.string().min(1, 'Address is required'),
-  category: z.string().min(1, 'Category is required'),
-   userType: z.string().min(1, 'User type is required'),
+  FullName: z.string().min(1, 'Full name is required'),
+  Email: z.string().email('Invalid email format'),
+  Password: z.string().min(6, 'Password must be at least 6 characters'),
+  PhoneNumber: z.string().min(1, 'Phone number is required'),
+  RestaurantName: z.string().min(1, 'Restaurant name is required'),
+  RestaurantEmail: z.string().email('Invalid email format'),
+RestaurantPhone: z.string().min(1, 'Restaurant phone is required'),
+RestaurantAddress: z.string().min(1, 'Restaurant address is required'),
+UserTypeName: z.string().refine(val => ['Resturant', 'Admin', 'User'].includes(val)),   
+CategoryName: z.string().min(1, 'Category is required'),
+
 });
+
 
 type FormData = z.infer<typeof restaurantSchema>;
 
@@ -58,47 +61,44 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
 
   const form = useForm<FormData>({
     resolver: zodResolver(restaurantSchema),
-    defaultValues: initialData || {
-      ownerName: '',
-      ownerPhone: '',
-      ownerEmail: '',
-      password: '',
-      restaurantName: '',
-      userType: '',
-      restaurantPhone: '',
-      restaurantEmail: '',
-      address: '',
-      category: '',
-      
-    },
-  });
+  defaultValues: {
+  FullName: '',
+  Email: '',
+  Password: '',
+  PhoneNumber: '',
+  RestaurantName: '',
+  RestaurantEmail: '',
+  RestaurantPhone: '',
+  RestaurantAddress: '',
+  UserTypeName: 'Resturant',
+  }
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      setIsSubmitting(true);
-      
-      // In a real application, you would send this to an API
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      
-      onSave(data);
-      form.reset();
-      
-      toast({
-        title: initialData ? "Restaurant updated" : "Restaurant added",
-        description: `${data.restaurantName} has been ${initialData ? "updated" : "added"} successfully.`,
-      });
-      
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "There was an error processing your request.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  });
+  
+const onSubmit = async (data: FormData) => { 
+   console.log("Inside onSubmit", data);
+  try {
+    setIsSubmitting(true);
+    const result = await addRestaurant(data as Restaurant);
+
+    toast({
+      title: 'Restaurant added',
+      description: `${data.RestaurantName} has been added successfully.`,
+    });
+
+    form.reset();
+    onClose();
+  } catch (error) {
+    toast({
+      title: 'Error',
+      description: 'There was an error adding the restaurant.',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -119,10 +119,10 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="ownerName"
+                name="FullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Owner Name</FormLabel>
+                    <FormLabel> fullName</FormLabel>
                     <FormControl>
                       <Input placeholder="John Doe" {...field} />
                     </FormControl>
@@ -133,10 +133,10 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
               
               <FormField
                 control={form.control}
-                name="ownerPhone"
+                name="PhoneNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Owner Phone</FormLabel>
+                    <FormLabel>phoneNumber</FormLabel>
                     <FormControl>
                       <Input placeholder="+961 71 123 456" {...field} />
                     </FormControl>
@@ -147,10 +147,10 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
               
               <FormField
                 control={form.control}
-                name="ownerEmail"
+                name="Email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Owner Email</FormLabel>
+                    <FormLabel>email</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="owner@restaurant.com" {...field} />
                     </FormControl>
@@ -161,7 +161,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
               
               <FormField
                 control={form.control}
-                name="password"
+                name="Password"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Password</FormLabel>
@@ -175,7 +175,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
               
               <FormField
                 control={form.control}
-                name="restaurantName"
+                name="RestaurantName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Restaurant Name</FormLabel>
@@ -189,12 +189,12 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
 
                 <FormField
                             control={form.control}
-                            name="userType"
+                            name="UserTypeName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>User Type</FormLabel>
+                                <FormLabel> userTypeName</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Restaurant" {...field} />
+                                  <Input placeholder="Resturant" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -203,7 +203,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
               
               <FormField
                 control={form.control}
-                name="restaurantPhone"
+                name="RestaurantPhone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Restaurant Phone</FormLabel>
@@ -217,7 +217,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
               
               <FormField
                 control={form.control}
-                name="restaurantEmail"
+                name="RestaurantEmail"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Restaurant Email</FormLabel>
@@ -229,27 +229,27 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Lebanese, Italian, etc " {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+             <FormField
+  control={form.control}
+  name="CategoryName"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Category</FormLabel>
+      <FormControl>
+        <Input placeholder="Fast food" {...field} />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>    
             </div>
             
             <FormField
               control={form.control}
-              name="address"
+              name="RestaurantAddress"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address</FormLabel>
+                  <FormLabel> restaurantAddress</FormLabel>
                   <FormControl>
                     <Input placeholder="123 Main St, City" {...field} />
                   </FormControl>

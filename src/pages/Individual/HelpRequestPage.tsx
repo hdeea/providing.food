@@ -10,8 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { HelpRequest } from '../../types/FoodBond';
 import { Heart, User, Mail, Phone, Users, AlertCircle } from 'lucide-react';
+import { HelpRequest } from '@/types/individual';
 
 const helpRequestSchema = z.object({
   name: z.string().min(1, 'Name is required'),

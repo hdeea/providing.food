@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, ScanQrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,15 +9,18 @@ import QRScanner from '../../components/Scanner/QRScanner';
 import VoucherDetails from '../../components/Scanner/VoucherDetails';
 import { DonationRequest } from '../../types';
 import { VoucherIssuance } from '../../types/individual';
-import { mockDonationRequests } from '../../data/mockData';
-import { useAuth } from '../../contexts/AuthContext';
 
 const DashboardPage: React.FC = () => {
-  const { user } = useAuth();
-  const [donations, setDonations] = useState<DonationRequest[]>(mockDonationRequests);
+  const [donations, setDonations] = useState<DonationRequest[]>([]);
   const [isDonationFormOpen, setIsDonationFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('donations');
   const [scannedVoucher, setScannedVoucher] = useState<VoucherIssuance | null>(null);
+
+  // تحضير لتحميل البيانات لاحقًا
+  useEffect(() => {
+    // مستقبلاً: هون مكان API call لجلب التبرعات
+    // مثال: fetchDonations().then(setDonations);
+  }, []);
 
   const handleDonationSave = (donationData: Partial<DonationRequest>) => {
     const newDonation: DonationRequest = {
@@ -30,26 +32,13 @@ const DashboardPage: React.FC = () => {
       status: 'pending',
       createdAt: new Date().toISOString(),
     };
-    
-    setDonations([newDonation, ...donations]);
+
+    setDonations([newDonation, ...donations]); // مؤقتاً محلي، للعرض فقط
   };
 
   const handleScan = (qrData: string) => {
-    // In a real app, you would verify the QR code with the backend
-    // For demo purposes, we'll just show a mock voucher
-    const mockVoucher: VoucherIssuance = {
-      id: qrData,
-      beneficiaryId: '1',
-      restaurantId: '1',
-      issuedBy: 'admin',
-      mealCount: Math.floor(Math.random() * 5) + 1,
-      validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      qrCode: qrData,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-    };
-    
-    setScannedVoucher(mockVoucher);
+    // تجهيز لربط لاحق، حالياً نتركه فاضي أو نعلّق الكود
+    setScannedVoucher(null); // لاحقاً منربط
   };
 
   const resetScanner = () => {
@@ -58,7 +47,6 @@ const DashboardPage: React.FC = () => {
 
   const handleVoucherProcessed = () => {
     if (scannedVoucher) {
-      // Update voucher status to used
       setScannedVoucher({
         ...scannedVoucher,
         status: 'used'
@@ -73,7 +61,7 @@ const DashboardPage: React.FC = () => {
           <TabsTrigger value="donations">Donations</TabsTrigger>
           <TabsTrigger value="scanner">QR Scanner</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="donations" className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
@@ -85,9 +73,9 @@ const DashboardPage: React.FC = () => {
               New Donation
             </Button>
           </div>
-          
+
           <DonationsList donations={donations} />
-          
+
           {isDonationFormOpen && (
             <DonationForm
               isOpen={isDonationFormOpen}
@@ -97,7 +85,7 @@ const DashboardPage: React.FC = () => {
             />
           )}
         </TabsContent>
-        
+
         <TabsContent value="scanner" className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
@@ -105,7 +93,7 @@ const DashboardPage: React.FC = () => {
               <p className="text-gray-500">Scan food vouchers for beneficiaries</p>
             </div>
           </div>
-          
+
           <div className="bg-white p-8 rounded-lg shadow">
             {scannedVoucher ? (
               <VoucherDetails 

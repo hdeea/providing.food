@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -24,6 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { postBeneficiary } from "@/api/postBeneficiary";
 
 interface BeneficiaryFormProps {
   isOpen: boolean;
@@ -32,15 +32,12 @@ interface BeneficiaryFormProps {
   initialData?: Beneficiary;
 }
 
+// ✅ عدلنا السكيمة بحسب المطلوب:
 const beneficiarySchema = z.object({
-  name: z.string().min(1, 'Full name is required'),
-  phone: z.string().min(1, 'Phone number is required'),
-  email: z.string().email('Invalid email format'),
-  address: z.string().min(1, 'Address is required'),
+  fullName: z.string().min(1, 'Full name is required'),
+  phoneNumber: z.string().min(1, 'Phone number is required'),
   familySize: z.coerce.number().min(1, 'Family size must be at least 1'),
-  isActive: z.enum(['true', 'false'], {
-    required_error: 'Please select active status',
-  }),
+  isActive: z.boolean(),
 });
 
 type FormData = z.infer<typeof beneficiarySchema>;
@@ -57,47 +54,35 @@ const BeneficiaryForm: React.FC<BeneficiaryFormProps> = ({
   const form = useForm<FormData>({
     resolver: zodResolver(beneficiarySchema),
     defaultValues: {
-      name: initialData?.name || '',
-      phone: initialData?.phone || '',
-      email: initialData?.email || '',
-      address: initialData?.address || '',
-      familySize: 1,
-      isActive: 'true',
+      fullName: initialData?.fullName || '',
+      phoneNumber: initialData?.phoneNumber || '',
+      familySize: initialData?.familySize || 1,
+      isActive: initialData?.isActive ?? true,
     },
   });
+const onSubmit = async (data: FormData) => { 
+  console.log("Inside onSubmit", data);
+  try {
+    setIsSubmitting(true);
+    const result = await postBeneficiary(data as Beneficiary);
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      setIsSubmitting(true);
-      
-      // In a real application, you would send this to an API
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      
-      const beneficiaryData = {
-        ...data,
-        familySize: data.familySize,
-        isActive: data.isActive === 'true',
-      };
-      
-      onSave(beneficiaryData);
-      form.reset();
-      
-      toast({
-        title: initialData ? "Beneficiary updated" : "Beneficiary added",
-        description: `${data.name} has been ${initialData ? "updated" : "added"} successfully.`,
-      });
-      
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "There was an error processing your request.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    toast({
+      title: 'Beneficiary added',
+      description: `${data.fullName} has been added successfully.`,
+    });
+
+    form.reset();
+    onClose();
+  } catch (error) {
+    toast({
+      title: 'Error',
+      description: 'There was an error adding the beneficiary.',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -112,12 +97,12 @@ const BeneficiaryForm: React.FC<BeneficiaryFormProps> = ({
               : 'Fill in beneficiary details to add a new beneficiary'}
           </DialogDescription>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="name"
+              name="fullName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
@@ -128,43 +113,15 @@ const BeneficiaryForm: React.FC<BeneficiaryFormProps> = ({
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
-              name="phone"
+              name="phoneNumber"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
                     <Input placeholder="+966 76 123 456" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="example@email.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="123 Main St, City" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -178,9 +135,9 @@ const BeneficiaryForm: React.FC<BeneficiaryFormProps> = ({
                 <FormItem>
                   <FormLabel>Family Size</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
-                      min="1" 
+                    <Input
+                      type="number"
+                      min="1"
                       placeholder="Number of family members"
                       {...field}
                       value={field.value.toString()}
@@ -198,7 +155,10 @@ const BeneficiaryForm: React.FC<BeneficiaryFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Is Active</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === 'true')}
+                    defaultValue={field.value ? 'true' : 'false'}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
@@ -213,12 +173,12 @@ const BeneficiaryForm: React.FC<BeneficiaryFormProps> = ({
                 </FormItem>
               )}
             />
-            
+
             <DialogFooter>
               <Button variant="outline" type="button" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" className="button-blue" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Processing..." : initialData ? "Update" : "Save"}
               </Button>
             </DialogFooter>

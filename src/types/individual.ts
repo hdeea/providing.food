@@ -1,20 +1,17 @@
 
 // Individual donation types (for people who want to donate, not request help)
-export interface IndividualDonor {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  donationType: 'money' | 'food' | 'both';
-  amount?: number;
-  foodDescription?: string;
+export interface DonationIndividualDto {
+  id: string;     
   status: 'pending' | 'approved' | 'rejected';
-  totalDonations: number;
-  createdAt: string;
-  reviewedAt?: string;
-  notes?: string;
+  foodName: string;
+  userType: string;
+  description: string;
+  image: string;
+  country: string;
+  vegetarian: boolean;
+  userEmail: string;
 }
+
 
 // Individual donation transaction
 export interface DonationTransaction {

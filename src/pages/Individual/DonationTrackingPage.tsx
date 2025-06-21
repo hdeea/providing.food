@@ -1,17 +1,14 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Badge } from '@/components/ui/badge';
-import { Search, Clock, CheckCircle, XCircle, Heart, Phone, MapPin, Mail, DollarSign, Utensils } from 'lucide-react';
-import { mockIndividualDonors } from '../../data/individualMockData';
-import { IndividualDonor } from '../../types/FoodBond';
-import { formatDateTime } from '../../utils/helpers';
+import { Search, Clock, CheckCircle, XCircle, Heart, Mail } from 'lucide-react';
+import { DonationIndividualDto } from '@/types/individual';
 
 const trackSchema = z.object({
   email: z.string().email('البريد الإلكتروني غير صحيح'),
@@ -20,88 +17,57 @@ const trackSchema = z.object({
 type FormData = z.infer<typeof trackSchema>;
 
 const DonationTrackingPage: React.FC = () => {
-  const [donations, setDonations] = useState<IndividualDonor[]>([]);
+  const [donations, setDonations] = useState<DonationIndividualDto[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // دالة جلب التبرعات من API بناءً على البريد الإلكتروني
+  const fetchDonationsByEmail = async (email: string): Promise<DonationIndividualDto[]> => {
+    const response = await fetch(`https://your-backend-api.com/api/donations?email=${encodeURIComponent(email)}`);
+    if (!response.ok) throw new Error('Failed to fetch donations');
+    const data: DonationIndividualDto[] = await response.json();
+    return data;
+  };
+
   const form = useForm<FormData>({
     resolver: zodResolver(trackSchema),
-    defaultValues: {
-      email: '',
-    },
+    defaultValues: { email: '' },
   });
 
   const onSubmit = async (data: FormData) => {
+    setIsSearching(true);
+    setHasSearched(true);
     try {
-      setIsSearching(true);
-      setHasSearched(true);
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Filter mock data by email
-      const userDonations = mockIndividualDonors.filter(
-        donor => donor.email.toLowerCase() === data.email.toLowerCase()
-      );
-      
+      const userDonations = await fetchDonationsByEmail(data.email);
       setDonations(userDonations);
-      
     } catch (error) {
-      console.error('Error searching donations:', error);
+      console.error('Error fetching donations:', error);
+      setDonations([]);
     } finally {
       setIsSearching(false);
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: DonationIndividualDto['status']) => {
     switch (status) {
       case 'approved':
         return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            مقبول
+          <Badge className="bg-green-100 text-green-800 hover:bg-green-100 flex items-center">
+            <CheckCircle className="w-3 h-3 mr-1" /> مقبول
           </Badge>
         );
       case 'rejected':
         return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-            <XCircle className="w-3 h-3 mr-1" />
-            مرفوض
+          <Badge className="bg-red-100 text-red-800 hover:bg-red-100 flex items-center">
+            <XCircle className="w-3 h-3 mr-1" /> مرفوض
           </Badge>
         );
       default:
         return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-            <Clock className="w-3 h-3 mr-1" />
-            قيد المراجعة
+          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 flex items-center">
+            <Clock className="w-3 h-3 mr-1" /> قيد المراجعة
           </Badge>
         );
-    }
-  };
-
-  const getDonationTypeIcon = (type: string) => {
-    switch (type) {
-      case 'money':
-        return <DollarSign className="w-4 h-4" />;
-      case 'food':
-        return <Utensils className="w-4 h-4" />;
-      case 'both':
-        return <Heart className="w-4 h-4" />;
-      default:
-        return <Heart className="w-4 h-4" />;
-    }
-  };
-
-  const getDonationTypeLabel = (type: string) => {
-    switch (type) {
-      case 'money':
-        return 'تبرع نقدي';
-      case 'food':
-        return 'تبرع بالطعام';
-      case 'both':
-        return 'تبرع نقدي وطعام';
-      default:
-        return type;
     }
   };
 
@@ -134,8 +100,8 @@ const DonationTrackingPage: React.FC = () => {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormControl>
-                        <Input 
-                          type="email" 
+                        <Input
+                          type="email"
                           placeholder="أدخل بريدك الإلكتروني"
                           {...field}
                         />
@@ -144,7 +110,11 @@ const DonationTrackingPage: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={isSearching} className="bg-blue-600 hover:bg-blue-700">
+                <Button
+                  type="submit"
+                  disabled={isSearching}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
                   <Search className="w-4 h-4 mr-2" />
                   {isSearching ? "البحث..." : "بحث"}
                 </Button>
@@ -161,7 +131,7 @@ const DonationTrackingPage: React.FC = () => {
                 <CardContent className="text-center py-8">
                   <p className="text-gray-500">لا توجد طلبات تبرع مرتبطة بهذا البريد الإلكتروني</p>
                   <p className="text-sm text-gray-400 mt-2">
-                    تأكد من صحة البريد الإلكتروني أو 
+                    تأكد من صحة البريد الإلكتروني أو
                     <a href="/individual/donor-registration" className="text-blue-600 hover:underline mx-1">
                       قدم طلب تبرع جديد
                     </a>
@@ -174,66 +144,45 @@ const DonationTrackingPage: React.FC = () => {
                   طلبات التبرع ({donations.length})
                 </h2>
                 {donations.map((donation) => (
-                  <Card key={donation.id}>
+                  <Card key={donation.userEmail + donation.foodName}>
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="font-semibold text-lg">{donation.name}</h3>
+                          <h3 className="font-semibold text-lg">{donation.foodName}</h3>
                           <p className="text-sm text-gray-500">
-                            رقم الطلب: {donation.id}
+                            نوع المستخدم: {donation.userType}
                           </p>
                         </div>
                         {getStatusBadge(donation.status)}
                       </div>
-                      
-                      <div className="grid md:grid-cols-2 gap-4 mb-4">
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm">{donation.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm">{donation.phone}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm">{donation.address}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {getDonationTypeIcon(donation.donationType)}
-                          <span className="text-sm">{getDonationTypeLabel(donation.donationType)}</span>
-                        </div>
+
+                      <div className="flex items-center gap-2 mb-2">
+                        <Mail className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm">{donation.userEmail}</span>
                       </div>
-                      
-                      {donation.amount && (
+
+                      <div className="mb-2">
+                        <span className="font-medium">الوصف:</span>
+                        <p className="mt-1 text-gray-700">{donation.description}</p>
+                      </div>
+
+                      <div className="mb-2">
+                        <span className="font-medium">البلد:</span>
+                        <span className="ml-2">{donation.country}</span>
+                      </div>
+
+                      <div className="mb-2">
+                        <span className="font-medium">هل النباتي:</span>
+                        <span className="ml-2">{donation.vegetarian ? 'نعم' : 'لا'}</span>
+                      </div>
+
+                      {donation.image && (
                         <div className="mb-2">
-                          <span className="font-medium">المبلغ:</span>
-                          <span className="ml-2">{donation.amount} ريال سعودي</span>
-                        </div>
-                      )}
-                      
-                      {donation.foodDescription && (
-                        <div className="mb-4">
-                          <span className="font-medium">وصف الطعام:</span>
-                          <p className="mt-1 text-gray-700">{donation.foodDescription}</p>
-                        </div>
-                      )}
-                      
-                      <div className="mb-4">
-                        <span className="font-medium">تاريخ الطلب:</span>
-                        <span className="ml-2">{formatDateTime(donation.createdAt)}</span>
-                      </div>
-                      
-                      {donation.reviewedAt && (
-                        <div className="pt-4 border-t">
-                          <span className="font-medium">تاريخ المراجعة:</span>
-                          <span className="ml-2">{formatDateTime(donation.reviewedAt)}</span>
-                          {donation.notes && (
-                            <div className="mt-2">
-                              <span className="font-medium">ملاحظات:</span>
-                              <p className="mt-1 text-gray-700">{donation.notes}</p>
-                            </div>
-                          )}
+                          <img
+                            src={donation.image}
+                            alt={`صورة تبرع: ${donation.foodName}`}
+                            className="w-full max-w-xs rounded"
+                          />
                         </div>
                       )}
                     </CardContent>

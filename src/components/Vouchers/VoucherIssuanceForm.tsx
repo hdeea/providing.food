@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -9,28 +10,18 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { VoucherIssuance } from '../../types/individual';
 import { Gift } from 'lucide-react';
-
-interface FoodBondResponse {
-  BondId: number;
-  QRCode: string;
-  Message: string;
-}
-
 const voucherSchema = z.object({
-  beneficiaryName: z.string().min(1, "اسم المستفيد مطلوب"),
-  restaurantName: z.string().min(1, "اسم المطعم مطلوب"),
-  numberOfMeals: z.number().min(1, "يجب أن تكون عدد الوجبات أكبر من صفر"),
-  expiryDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
-    message: "التاريخ غير صالح"
-  }),
+  beneficiaryName: z.string().min(1, 'Beneficiary name is required'),
+  restaurantName: z.string().min(1, 'Restaurant name is required'),
+  mealCount: z.coerce.number().min(1, 'Number of meals must be greater than 0'),
+  validHours: z.coerce.number().min(1, 'Validity period is required'),
 });
 
 type FormData = z.infer<typeof voucherSchema>;
 
 interface VoucherIssuanceFormProps {
-  onVoucherIssued: (voucher: FoodBondResponse) => void;
+  onVoucherIssued: (voucher: VoucherIssuance) => void;
 }
-
 
 const VoucherIssuanceForm: React.FC<VoucherIssuanceFormProps> = ({ onVoucherIssued }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,49 +32,45 @@ const VoucherIssuanceForm: React.FC<VoucherIssuanceFormProps> = ({ onVoucherIssu
     defaultValues: {
       beneficiaryName: '',
       restaurantName: '',
-      numberOfMeals: 5,
-      expiryDate: '',
+      mealCount: 5,
+      validHours: 24,
     },
   });
 
   const onSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
-
-      const payload = {
-        BeneficiaryName: data.beneficiaryName,
-        RestaurantName: data.restaurantName,
-        NumberOfMeals: data.numberOfMeals,
-        ExpiryDate: new Date(data.expiryDate).toISOString(),
+      
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      const validUntil = new Date();
+      validUntil.setHours(validUntil.getHours() + data.validHours);
+      
+      const newVoucher: VoucherIssuance = {
+        id: `V${Date.now()}`,
+        beneficiaryId: data.beneficiaryName,
+        restaurantId: data.restaurantName,
+        issuedBy: 'admin',
+        mealCount: data.mealCount,
+        validUntil: validUntil.toISOString(),
+        qrCode: `QR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'active',
+        createdAt: new Date().toISOString(),
       };
-
-      const response = await fetch('', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.Error || 'خطأ في إصدار السند');
-      }
-
-const result: FoodBondResponse = await response.json();
-
-      toast({
-        title: "تم إصدار السند بنجاح",
-        description: `تم إنشاء السند برقم ${result.BondId} ورمز QR ${result.QRCode}`,
-      });
-
+      
+      onVoucherIssued(newVoucher);
       form.reset();
-
-      if (onVoucherIssued) {
-        onVoucherIssued(result);
-      }
-    } catch (error: any) {
+      
       toast({
-        title: "خطأ",
-        description: error.message || "حدث خطأ أثناء إصدار السند",
+        title: "Voucher issued successfully",
+        description: `Food voucher issued for ${data.beneficiaryName} with ${data.mealCount} meals valid for ${data.validHours} hours`,
+      });
+      
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while issuing the voucher",
         variant: "destructive",
       });
     } finally {
@@ -96,7 +83,7 @@ const result: FoodBondResponse = await response.json();
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Gift className="w-5 h-5" />
-          إصدار سند طعام جديد
+          Issue New Food Voucher
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -107,9 +94,9 @@ const result: FoodBondResponse = await response.json();
               name="beneficiaryName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>اسم المستفيد</FormLabel>
+                  <FormLabel>Beneficiary Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل اسم المستفيد" {...field} />
+                    <Input placeholder="Enter beneficiary name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -121,9 +108,9 @@ const result: FoodBondResponse = await response.json();
               name="restaurantName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>اسم المطعم</FormLabel>
+                  <FormLabel>Restaurant Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل اسم المطعم" {...field} />
+                    <Input placeholder="Enter restaurant name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,15 +119,15 @@ const result: FoodBondResponse = await response.json();
 
             <FormField
               control={form.control}
-              name="numberOfMeals"
+              name="mealCount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>عدد الوجبات</FormLabel>
+                  <FormLabel>Number of Meals</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="عدد الوجبات"
+                    <Input 
+                      type="number" 
+                      min="1" 
+                      placeholder="Number of meals"
                       {...field}
                       value={field.value.toString()}
                       onChange={(e) => field.onChange(e.target.valueAsNumber || 1)}
@@ -153,17 +140,18 @@ const result: FoodBondResponse = await response.json();
 
             <FormField
               control={form.control}
-              name="expiryDate"
+              name="validHours"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>تاريخ انتهاء الصلاحية</FormLabel>
+                  <FormLabel>Expiration Date (Hours)</FormLabel>
                   <FormControl>
-                    <Input
-                      type="date"
-                      placeholder="اختر تاريخ انتهاء الصلاحية"
+                    <Input 
+                      type="number" 
+                      min="1" 
+                      placeholder="Validity period in hours"
                       {...field}
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      value={field.value.toString()}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber || 1)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -171,12 +159,12 @@ const result: FoodBondResponse = await response.json();
               )}
             />
 
-            <Button
-              type="submit"
-              className="w-full button-blue"
+            <Button 
+              type="submit" 
+              className="w-full button-blue" 
               disabled={isSubmitting}
             >
-              {isSubmitting ? "جاري الإصدار..." : "إصدار السند"}
+              {isSubmitting ? "Issuing..." : "Issue Voucher"}
             </Button>
           </form>
         </Form>

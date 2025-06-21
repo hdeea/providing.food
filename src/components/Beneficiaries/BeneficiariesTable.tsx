@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Beneficiary } from '../../types';
 import { Edit, Trash2 } from 'lucide-react';
@@ -13,13 +12,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { formatDate } from '../../utils/helpers';
 import { useToast } from '@/hooks/use-toast';
 
 interface BeneficiariesTableProps {
   beneficiaries: Beneficiary[];
   onEdit: (beneficiary: Beneficiary) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
 }
 
 const BeneficiariesTable: React.FC<BeneficiariesTableProps> = ({
@@ -38,10 +36,10 @@ const BeneficiariesTable: React.FC<BeneficiariesTableProps> = ({
 
   const confirmDelete = () => {
     if (selectedBeneficiary) {
-      onDelete(selectedBeneficiary.id);
+      onDelete(selectedBeneficiary.beneficiaryId);
       toast({
         title: "Beneficiary deleted",
-        description: `${selectedBeneficiary.name} has been removed.`,
+        description: `${selectedBeneficiary.fullName} has been removed.`,
       });
       setShowDeleteDialog(false);
     }
@@ -59,10 +57,10 @@ const BeneficiariesTable: React.FC<BeneficiariesTableProps> = ({
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registration Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone Number</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Family Size</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Is Active</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -75,22 +73,21 @@ const BeneficiariesTable: React.FC<BeneficiariesTableProps> = ({
               </tr>
             ) : (
               beneficiaries.map((beneficiary) => (
-                <tr key={beneficiary.id} className="hover:bg-gray-50">
+                <tr key={beneficiary.beneficiaryId} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {beneficiary.id}
+                    {beneficiary.beneficiaryId}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {beneficiary.name}
+                    {beneficiary.fullName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div>{beneficiary.phone}</div>
-                    <div className="text-xs text-gray-400">{beneficiary.email}</div>
+                    {beneficiary.phoneNumber}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {beneficiary.address}
+                    {beneficiary.familySize}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(beneficiary.registrationDate)}
+                    {beneficiary.isActive ? 'Active' : 'Inactive'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end gap-2">
@@ -125,7 +122,7 @@ const BeneficiariesTable: React.FC<BeneficiariesTableProps> = ({
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently delete{' '}
-              <span className="font-semibold">{selectedBeneficiary?.name}</span>.
+              <span className="font-semibold">{selectedBeneficiary?.fullName}</span>.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

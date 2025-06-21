@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { IndividualDonor } from '../../types/FoodBond';
 import { Search, Heart, User, Mail, Phone, MapPin, Calendar, FileText } from 'lucide-react';
+import {DonationIndividualDto } from '../../types/individual';
 
 const trackSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -18,10 +18,11 @@ const trackSchema = z.object({
 type FormData = z.infer<typeof trackSchema>;
 
 const TrackDonationsPage: React.FC = () => {
-  const [donations, setDonations] = useState<IndividualDonor[]>([]);
+  const [donations, setDonations] = useState<DonationIndividualDto[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const { toast } = useToast();
+
 
   const form = useForm<FormData>({
     resolver: zodResolver(trackSchema),
@@ -30,7 +31,7 @@ const TrackDonationsPage: React.FC = () => {
     },
   });
 
-  const individualDonors: IndividualDonor[] = []; // حذف البيانات الوهمية
+  const individualDonors: DonationIndividualDto[] = []; // حذف البيانات الوهمية
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -42,7 +43,7 @@ const TrackDonationsPage: React.FC = () => {
       
       // تصفية البيانات بناءً على البريد الإلكتروني
       const userDonations = individualDonors.filter(
-        donor => donor.email.toLowerCase() === data.email.toLowerCase()
+        donor => donor. userEmail.toLowerCase() === data.email.toLowerCase()
       );
       
       setDonations(userDonations);
@@ -165,9 +166,7 @@ const TrackDonationsPage: React.FC = () => {
                             <Heart className="w-5 h-5" />
                             Request #{donation.id}
                           </CardTitle>
-                          <CardDescription>
-                            Submitted on {new Date(donation.createdAt).toLocaleDateString()}
-                          </CardDescription>
+                     
                         </div>
                         {getStatusBadge(donation.status)}
                       </div>

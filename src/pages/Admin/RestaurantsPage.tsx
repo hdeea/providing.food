@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -6,13 +6,33 @@ import RestaurantsTable from '../../components/Restaurants/RestaurantsTable';
 import RestaurantForm from '../../components/Restaurants/RestaurantForm';
 import { Restaurant } from '../../types';
 import { useToast } from '@/hooks/use-toast';
+import axios from 'axios';
+import { getRestaurants } from '@/api/getRestaurant';
 
 const RestaurantsPage: React.FC = () => {
-  // أزلنا mockRestaurants وبدأنا بقائمة فاضية
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | undefined>(undefined);
   const { toast } = useToast();
+
+  // ** هنا بنضيف useEffect لجلب البيانات **
+useEffect(() => {
+  const fetchRestaurants = async () => {
+    try {
+      const data = await getRestaurants();
+      setRestaurants(data);
+    } catch (error) {
+      toast({
+        title: "خطأ في جلب البيانات",
+        description: "فشل في تحميل بيانات المطاعم.",
+        variant: "destructive"
+      });
+      console.error(error);
+    }
+  };
+
+  fetchRestaurants();
+}, []);
 
   const handleOpenForm = () => {
     setSelectedRestaurant(undefined);
@@ -24,55 +44,60 @@ const RestaurantsPage: React.FC = () => {
     setSelectedRestaurant(undefined);
   };
 
-  const handleEdit = (restaurant: Restaurant) => {
-    setSelectedRestaurant(restaurant);
-    setIsFormOpen(true);
+  const handleEdit = (RestaurantId: number) => {
+    const selected = restaurants.find((r) => r.RestaurantId === RestaurantId);
+    if (selected) {
+      setSelectedRestaurant(selected);
+      setIsFormOpen(true);
+    }
   };
 
   const handleSave = (restaurantData: Partial<Restaurant>) => {
     if (selectedRestaurant) {
-      // تعديل مطعم موجود
       setRestaurants(
         restaurants.map((r) =>
-          r.id === selectedRestaurant.id
+          r.restaurantId === selectedRestaurant.restaurantId
             ? { ...r, ...restaurantData, updatedAt: new Date().toISOString() }
             : r
         )
       );
     } else {
-      // إضافة مطعم جديد
       const newRestaurant: Restaurant = {
-        id: `${restaurants.length + 1}`,
-        ownerName: restaurantData.ownerName || '',
-        ownerPhone: restaurantData.ownerPhone || '',
-        ownerEmail: restaurantData.ownerEmail || '',
-        password: restaurantData.password || '',
-        restaurantName: restaurantData.restaurantName || '',
-        restaurantPhone: restaurantData.restaurantPhone || '',
-        restaurantEmail: restaurantData.restaurantEmail || '',
-        address: restaurantData.address || '',
-        category: restaurantData.category || '',
-        createdAt: new Date().toISOString(),
+        RestaurantId: restaurants.length + 1,
+        CategoryId: restaurantData.CategoryId || 0,
+        UserId: restaurantData.UserId || undefined,
+        RestaurantName: restaurantData.RestaurantName || "",
+        RestaurantEmail: restaurantData.RestaurantEmail || "",
+        RestaurantPhone: restaurantData.RestaurantPhone || "",
+        RestaurantAddress: restaurantData.RestaurantAddress || "",
+        UserTypeName: restaurantData.UserTypeName || "",
+        restaurantId: function (restaurantId: any): void {
+          throw new Error('Function not implemented.');
+        },
+        FullName: '',
+        Email: '',
+        Password: '',
+        PhoneNumber: ''
       };
 
       setRestaurants([...restaurants, newRestaurant]);
     }
   };
 
-  const handleDelete = (id: string) => {
-    setRestaurants(restaurants.filter((r) => r.id !== id));
+  const handleDelete = (RestaurantId: number) => {
+    setRestaurants(restaurants.filter((r) => r.RestaurantId !== RestaurantId));
   };
 
   return (
     <DashboardLayout title="Restaurants">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold">Restaurant Management</h2>
+          <h2 className="text-2xl font-bold">إدارة المطاعم</h2>
           <p className="text-gray-500">Manage restaurants that contribute surplus food</p>
         </div>
         <Button onClick={handleOpenForm} className="button-blue">
           <Plus className="mr-2 h-4 w-4" />
-          Add Restaurant
+          إضافة مطعم
         </Button>
       </div>
 

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,7 +17,7 @@ import HelpRequestPage from "./pages/Individual/HelpRequestPage";
 import TrackRequestPage from "./pages/Individual/TrackRequestPage";
 import { ReactNode } from "react";
 import RestaurantLogin from './pages/Auth/RestaurantLogin';
-// داخل <Routes>
+
 const queryClient = new QueryClient();
 
 // Protected route component with proper authentication check
@@ -67,7 +66,6 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/restaurant/login" element={<RestaurantLogin />} />
-
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             
@@ -104,9 +102,6 @@ const App = () => (
             />
             
             {/* Restaurant Routes - PROTECTED */}
-             
-               <Route path="/restaurant/login" element={<RestaurantLogin />} />
-
             <Route
               path="/restaurant"
               element={
@@ -115,7 +110,15 @@ const App = () => (
                 </RestaurantRoute>
               }
             />
-              
+            <Route
+              path="/restaurant/dashboard"
+              element={
+                <RestaurantRoute>
+                  <DashboardPage />
+                </RestaurantRoute>
+              }
+            />
+            
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -126,5 +129,3 @@ const App = () => (
 );
 
 export default App;
-  
-            

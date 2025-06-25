@@ -23,7 +23,7 @@ const DonationTrackingPage: React.FC = () => {
 
   // دالة جلب التبرعات من API بناءً على البريد الإلكتروني
   const fetchDonationsByEmail = async (email: string): Promise<DonationIndividualDto[]> => {
-    const response = await fetch(`https://your-backend-api.com/api/donations?email=${encodeURIComponent(email)}`);
+    const response = await fetch(``);
     if (!response.ok) throw new Error('Failed to fetch donations');
     const data: DonationIndividualDto[] = await response.json();
     return data;
@@ -50,13 +50,13 @@ const DonationTrackingPage: React.FC = () => {
 
   const getStatusBadge = (status: DonationIndividualDto['status']) => {
     switch (status) {
-      case 'approved':
+      case 'Approved':
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-100 flex items-center">
             <CheckCircle className="w-3 h-3 mr-1" /> مقبول
           </Badge>
         );
-      case 'rejected':
+      case 'Rejected':
         return (
           <Badge className="bg-red-100 text-red-800 hover:bg-red-100 flex items-center">
             <XCircle className="w-3 h-3 mr-1" /> مرفوض

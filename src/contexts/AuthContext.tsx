@@ -10,24 +10,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// بيانات وهمية مؤقتة فقط لتجربة تسجيل الدخول للمطاعم
-const MOCK_USERS: User[] = [
-  {
-    id: "1",
-    name: "Admin User",
-    email: "admin@example.com",
-    role: "admin",
-    password: "admin123",
-  },
-  {
-    id: "2",
-    name: "Restaurant Owner",
-    email: "restaurant@example.com",
-    role: "restaurant",
-    password: "rest123",
-  },
-];
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -41,21 +23,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     setIsLoading(false);
   }, []);
+const login = async (email: string, password: string) => {
+  try {
+    const response = await fetch("/api/Auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-  const login = async (email: string, password: string) => {
-    // تحقق وهمي عن طريق البحث ضمن MOCK_USERS
-    const foundUser = MOCK_USERS.find(
-      (u) => u.email === email && u.password === password
-    );
-
-    if (foundUser) {
-      const { password, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem("user", JSON.stringify(userWithoutPassword));
-      return true;
+    if (!response.ok) {
+      console.error("فشل تسجيل الدخول");
+      return false;
     }
+
+    const data = await response.json();
+    setUser(data);
+    localStorage.setItem("user", JSON.stringify(data));
+    return true;
+
+  } catch (error) {
+    console.error("خطأ أثناء تسجيل الدخول:", error);
     return false;
-  };
+  }
+};
+
 
   const logout = () => {
     setUser(null);

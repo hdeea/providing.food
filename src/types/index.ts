@@ -6,24 +6,23 @@ export interface CreateAccount {
   phoneNumber: string;
 }
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "restaurant" | "individual"; 
+}
 
-// Restaurant types
-export type Restaurant = {
-  restaurantId(restaurantId: any): void;
-  RestaurantId: number;
-  CategoryId: number;         // رقم الفئة (لو تستخدمين الرقم)
-  CategoryName?: string;      // اسم الفئة (لو تحتاجينه)
-  UserId?: number;
-  RestaurantName: string;
-  RestaurantEmail: string;
-  RestaurantPhone: string;
-  RestaurantAddress: string;
-  UserTypeName: string;
-  FullName: string;
-  Email: string;
-  Password: string;
-  PhoneNumber: string;
-};
+export interface Restaurant {
+  restaurantId: number;
+  restaurantName: string;
+  restaurantPhone: string;
+  restaurantEmail: string;
+  categoryName: string;
+  address: string;
+  userId: string;
+}
+
 
 export interface Beneficiary {
   beneficiaryId: number;

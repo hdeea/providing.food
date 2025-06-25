@@ -1,57 +1,87 @@
-import React, { useState } from 'react';
-import DashboardLayout from '../../components/Layout/DashboardLayout'; 
-import VoucherIssuanceForm from '../../components/Vouchers/VoucherIssuanceForm';
+import React, { useState, useEffect } from 'react';
+import DashboardLayout from '../../components/Layout/DashboardLayout';
 import VouchersList from '../../components/Vouchers/VouchersList';
-import QRScanner from '../../components/Scanner/QRScanner';
-import VoucherDetails from '../../components/Scanner/VoucherDetails';
 import IndividualRequestsTable from '../../components/Individual/IndividualRequestsTable';
-import IndividualDonorsTable from '../../components/Individual/IndividualDonorsTable'; 
-import { Card, CardContent } from '@/components/ui/card'; 
+import IndividualDonorsTable from '../../components/Individual/IndividualDonorsTable';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { VoucherIssuance, HelpRequest, DonationIndividualDto } from '../../types/individual';
 import { Heart, Ticket, Users, UserPlus } from 'lucide-react';
+import { getIndividualDonations } from '../../api/getDonationIndividuals';
+import { updateDonationStatus } from '../../api/updateDonationStatus';
 
 const AssociationDashboard: React.FC = () => {
   const [vouchers, setVouchers] = useState<VoucherIssuance[]>([]);
   const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
-  const [donors, setDonors] = useState<DonationIndividualDto[]>([]); 
-  const [scannedVoucher, setScannedVoucher] = useState<VoucherIssuance | null>(null);
-  const { toast } = useToast(); 
+  const [donors, setDonors] = useState<DonationIndividualDto[]>([]);
+  const { toast } = useToast();
 
-  const handleHelpRequestStatusChange = (requestId: string, newStatus: 'approved' | 'rejected') => {
-    setHelpRequests(prev => prev.map(request =>
-      request.id === requestId
-        ? { ...request, status: newStatus }  // حذف reviewedAt و notes
-        : request
-    ));
-    toast({
-      title: newStatus === 'approved' ? "Help request approved" : "Help request rejected",
-      description: `Request ${requestId} status updated`,
-    });
-  };
+  useEffect(() => {
+    const fetchDonations = async () => {
+      try {
+        const data = await getIndividualDonations();
+        const dataWithId = data.map((item) => ({
+          ...item,
+          id: item.foodId,
+        }));
+        setDonors(dataWithId);
+      } catch (error) {
+        console.error("❌ Failed to fetch individual donations:", error);
+      }
+    };
 
-  const handleDonorStatusChange = (donorId: string, newStatus: 'approved' | 'rejected') => {
-    setDonors(prev => prev.map(donor =>
-      donor.id === donorId
-        ? { ...donor, status: newStatus }  // حذف reviewedAt و notes
-        : donor
-    ));
-    toast({
-      title: newStatus === 'approved' ? "Donation request approved" : "Donation request rejected",
-      description: `Donation request ${donorId} status updated`,
+    fetchDonations();
+  }, []);
+const handleDonorStatusChange = async (
+  donorId: number,
+  newStatus: 'Approved' | 'Rejected'
+) => {
+  const donor = donors.find(d => d.foodId === donorId);
+  if (!donor) return;
+
+  try {
+    await updateDonationStatus({
+      foodId: donor.foodId,
+      foodName: donor.foodName,
+      description: donor.description,
+      country: donor.country,
+      vegetarian: donor.vegetarian,
+      userEmail: donor.userEmail,
+      image: donor.image,
+      userType: donor.userType,
+      status: newStatus,
     });
-  };
+
+    setDonors(prev =>
+      prev.map(d =>
+        d.foodId === donorId ? { ...d, status: newStatus } : d
+      )
+    );
+
+    toast({
+      title: `تم تحديث الحالة إلى ${newStatus === 'Approved' ? 'مقبول' : 'مرفوض'}`,
+    });
+  } catch (error) {
+    toast({ title: 'فشل في تعديل الحالة', variant: 'destructive' });
+  }
+};
+
+
+
+  function handleHelpRequestStatusChange(requesId: string, newStatus: 'approved' | 'rejected'): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <DashboardLayout title="Association Dashboard">
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6"> 
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Ticket className="h-8 w-8 text-blue-600" /> 
-                <div className="ml-4"> 
+                <Ticket className="h-8 w-8 text-blue-600" />
+                <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Vouchers</p>
                   <p className="text-2xl font-bold text-gray-900">{vouchers.length}</p>
                 </div>
@@ -71,9 +101,9 @@ const AssociationDashboard: React.FC = () => {
           </Card>
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center"> 
+              <div className="flex items-center">
                 <Heart className="h-8 w-8 text-red-600" />
-                <div className="ml-4"> 
+                <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Donation Requests</p>
                   <p className="text-2xl font-bold text-gray-900">{donors.length}</p>
                 </div>
@@ -88,51 +118,51 @@ const AssociationDashboard: React.FC = () => {
                   <p className="text-sm font-medium text-gray-600">Pending Reviews</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {[...helpRequests, ...donors].filter(r => r.status === 'pending').length}
-                  </p> 
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="vouchers" className="w-full"> 
+        <Tabs defaultValue="vouchers" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="vouchers" className="flex items-center gap-2">
               <Ticket className="w-4 h-4" /> Food Vouchers
             </TabsTrigger>
-            <TabsTrigger value="help-requests" className="flex items-center gap-2"> 
+            <TabsTrigger value="help-requests" className="flex items-center gap-2">
               <Users className="w-4 h-4" /> Help Requests
             </TabsTrigger>
             <TabsTrigger value="donations" className="flex items-center gap-2">
               <Heart className="w-4 h-4" /> Donation Requests
             </TabsTrigger>
-          </TabsList> 
+          </TabsList>
 
           <TabsContent value="help-requests">
-            <IndividualRequestsTable 
-              requests={helpRequests} 
-              onStatusChange={handleHelpRequestStatusChange} 
-            /> 
-          </TabsContent> 
+            <IndividualRequestsTable
+              requests={helpRequests}
+              onStatusChange={handleHelpRequestStatusChange}
+            />
+          </TabsContent>
 
           <TabsContent value="donations">
-            <IndividualDonorsTable 
-              donors={donors} 
-              onStatusChange={handleDonorStatusChange} 
+            <IndividualDonorsTable
+              donors={donors}
+              onStatusChange={handleDonorStatusChange}
             />
           </TabsContent>
 
           <TabsContent value="vouchers" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <VouchersList vouchers={vouchers} /> 
+                <VouchersList vouchers={vouchers} />
               </div>
             </div>
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout> 
-  ); 
+    </DashboardLayout>
+  );
 };
 
 export default AssociationDashboard;

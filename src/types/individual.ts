@@ -1,16 +1,19 @@
-
-// Individual donation types (for people who want to donate, not request help)
+// ✅ types/individual.ts
 export interface DonationIndividualDto {
-  id: string;     
-  status: 'pending' | 'approved' | 'rejected';
+  requesId: number;  // ID الطلب من السيرفر
+  foodId: number;    // ✅ لازم يكون رقم
+  status: 'Pending' | 'Approved' | 'Rejected';  // ✅ حرف كبير
   foodName: string;
-  userType: string;
   description: string;
   image: string;
   country: string;
   vegetarian: boolean;
-  userEmail: string;
+  userEmail?: string;
+  userType?: string;
+  reviewedAt?: string;
+  id?: number; // للفرونت فقط
 }
+
 
 
 // Individual donation transaction

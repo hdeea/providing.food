@@ -11,20 +11,22 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { toast } from '@/hooks/use-toast';
 import { Heart, User, Mail, Utensils, MapPin, Search, Camera, LogIn, UserPlus } from 'lucide-react';
 import CreateAccountForm from '../../components/Individual/CreateAccountForm';
-
 import { postDonationIndividual } from '@/api/postDonationIndividual';
 import { DonationIndividualDto } from '@/types/individual';
+
 
 const donorSchema = z.object({
   foodName: z.string().min(1, 'Food name is required'),
   userType: z.string().min(1, 'User type is required'),
   address: z.string().min(1, 'Address is required'),
-  vegetarian: z.boolean().default(false),
+  vegetarian: z.boolean(),
   email: z.string().email('Invalid email address'),
-  foodImage: z.string().optional(),
+description: z.string().min(1, 'Description is required'),  // أضفنا هذا
+ foodImage: z.string().min(1, 'Food image is required'),
 });
 
 type FormData = z.infer<typeof donorSchema>;
+
 
 const DonorRegistrationPage: React.FC = () => {
   // الحالة لإظهار/إخفاء صفحة إنشاء الحساب
@@ -52,9 +54,10 @@ const DonorRegistrationPage: React.FC = () => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      form.setValue('foodImage', reader.result as string);
-    };
+   reader.onloadend = () => {
+  form.setValue('foodImage', reader.result as string, { shouldValidate: true });
+};
+
     reader.readAsDataURL(file);
   };
 
@@ -65,13 +68,15 @@ const DonorRegistrationPage: React.FC = () => {
       const payload: DonationIndividualDto = {
         foodName: data.foodName,
         userType: data.userType,
-        description: "", // يمكنك إضافة حقل الوصف لاحقًا إذا أردت
+        description: data.description,
         image: data.foodImage || "",
         country: data.address,
         vegetarian: data.vegetarian,
         userEmail: data.email,
-        id: '', // أو توليد ID حسب ما يناسبك
-        status: 'pending',
+        status: 'Pending',
+
+        requesId: 0,
+        foodId: 0
       };
 
       await postDonationIndividual(payload);
@@ -212,28 +217,56 @@ const DonorRegistrationPage: React.FC = () => {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="vegetarian"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>
-                          Vegetarian Food
-                        </FormLabel>
-                        <p className="text-sm text-muted-foreground">
-                          Check this if the food is vegetarian
-                        </p>
-                      </div>
-                    </FormItem>
-                  )}
-                />
+               <FormField
+  control={form.control}
+  name="vegetarian"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Is the food vegetarian?</FormLabel>
+      <FormControl>
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              value="true"
+              checked={field.value === true}
+              onChange={() => field.onChange(true)}
+            />
+            Yes
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              value="false"
+              checked={field.value === false}
+              onChange={() => field.onChange(false)}
+            />
+            No
+          </label>
+        </div>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+<FormField
+  control={form.control}
+  name="description"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="flex items-center gap-2">
+        <Utensils className="w-4 h-4" />
+        Description
+      </FormLabel>
+      <FormControl>
+        <Input placeholder="Write details about the food..." {...field} />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+
 
                 <FormField
                   control={form.control}

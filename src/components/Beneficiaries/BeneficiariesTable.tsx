@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { deleteBeneficiary } from "@/api/deleteBeneficiary"; 
 
 interface BeneficiariesTableProps {
   beneficiaries: Beneficiary[];
@@ -33,17 +34,27 @@ const BeneficiariesTable: React.FC<BeneficiariesTableProps> = ({
     setSelectedBeneficiary(beneficiary);
     setShowDeleteDialog(true);
   };
-
-  const confirmDelete = () => {
-    if (selectedBeneficiary) {
-      onDelete(selectedBeneficiary.beneficiaryId);
+const confirmDelete = async () => {
+  if (selectedBeneficiary) {
+    try {
+      await deleteBeneficiary(selectedBeneficiary.beneficiaryId);
+      onDelete(selectedBeneficiary.beneficiaryId); // حدث الواجهة
       toast({
         title: "Beneficiary deleted",
         description: `${selectedBeneficiary.fullName} has been removed.`,
       });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete beneficiary.",
+        variant: "destructive",
+      });
+    } finally {
       setShowDeleteDialog(false);
     }
-  };
+  }
+};
+
 
   const cancelDelete = () => {
     setSelectedBeneficiary(null);

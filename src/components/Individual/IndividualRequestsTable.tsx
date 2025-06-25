@@ -10,7 +10,7 @@ import { HelpRequest } from '@/types/individual';
 
 interface IndividualRequestsTableProps {
   requests: HelpRequest[];
-  onStatusChange: (requestId: string, newStatus: 'approved' | 'rejected') => void;
+  onStatusChange: (requesId: string, newStatus: 'approved' | 'rejected') => void;
 }
 
 const IndividualRequestsTable: React.FC<IndividualRequestsTableProps> = ({ 

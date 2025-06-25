@@ -23,7 +23,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { postBeneficiary } from "@/api/postBeneficiary";
+import { postBeneficiary } from '@/api/postBeneficiary';
+import { updateBeneficiary } from '@/api/updateBeneficiary';
 
 interface BeneficiaryFormProps {
   isOpen: boolean;
@@ -32,7 +33,6 @@ interface BeneficiaryFormProps {
   initialData?: Beneficiary;
 }
 
-// ✅ عدلنا السكيمة بحسب المطلوب:
 const beneficiarySchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   phoneNumber: z.string().min(1, 'Phone number is required'),
@@ -54,29 +54,38 @@ const BeneficiaryForm: React.FC<BeneficiaryFormProps> = ({
   const form = useForm<FormData>({
     resolver: zodResolver(beneficiarySchema),
     defaultValues: {
-      fullName: initialData?.fullName || '',
-      phoneNumber: initialData?.phoneNumber || '',
-      familySize: initialData?.familySize || 1,
-      isActive: initialData?.isActive ?? true,
+      fullName: initialData.fullName || '',
+      phoneNumber: initialData.phoneNumber || '',
+      familySize: initialData.familySize || 1,
+      isActive: initialData.isActive ?? true,
     },
   });
-const onSubmit = async (data: FormData) => { 
-  console.log("Inside onSubmit", data);
+const onSubmit = async (data: FormData) => {
   try {
     setIsSubmitting(true);
-    const result = await postBeneficiary(data as Beneficiary);
 
-    toast({
-      title: 'Beneficiary added',
-      description: `${data.fullName} has been added successfully.`,
-    });
+    if (initialData) {
+      // تعديل
+      await updateBeneficiary({ ...data, beneficiaryId: initialData.beneficiaryId });
+      toast({
+        title: 'Beneficiary updated',
+        description: `${data.fullName} has been updated successfully.`,
+      });
+    } else {
+      // إضافة
+      await postBeneficiary(data as Beneficiary);
+      toast({
+        title: 'Beneficiary added',
+        description: `${data.fullName} has been added successfully.`,
+      });
+    }
 
     form.reset();
     onClose();
   } catch (error) {
     toast({
       title: 'Error',
-      description: 'There was an error adding the beneficiary.',
+      description: 'An error occurred while saving the beneficiary.',
       variant: 'destructive',
     });
   } finally {
@@ -179,7 +188,7 @@ const onSubmit = async (data: FormData) => {
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Processing..." : initialData ? "Update" : "Save"}
+                {isSubmitting ? 'Processing...' : initialData ? 'Update' : 'Save'}
               </Button>
             </DialogFooter>
           </form>

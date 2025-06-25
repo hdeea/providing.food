@@ -37,10 +37,10 @@ const RestaurantsTable: React.FC<RestaurantsTableProps> = ({
 
   const confirmDelete = () => {
     if (selectedRestaurant) {
-      onDelete(selectedRestaurant.RestaurantId);
+      onDelete(selectedRestaurant.restaurantId);
       toast({
         title: 'Restaurant deleted',
-        description: `${selectedRestaurant.RestaurantName} has been removed.`,
+        description: `${selectedRestaurant.restaurantName} has been removed.`,
       });
       setShowDeleteDialog(false);
     }
@@ -68,29 +68,30 @@ const RestaurantsTable: React.FC<RestaurantsTableProps> = ({
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-     <tbody className="bg-white divide-y divide-gray-200">
+   <tbody className="bg-white divide-y divide-gray-200">
   {restaurants.length === 0 && (
     <tr>
-      <td colSpan={12} className="px-6 py-4 text-center text-sm text-gray-500">
+      <td colSpan={8} className="px-6 py-4 text-center text-sm text-gray-500">
         No restaurants found
       </td>
     </tr>
   )}
 
   {restaurants.length > 0 && restaurants.map((restaurant) => (
-    <tr key={restaurant.RestaurantId} className="hover:bg-gray-50">
-      <td className="px-6 py-4 text-sm font-medium text-gray-900">{restaurant.RestaurantName}</td>
-      <td className="px-6 py-4 text-sm text-gray-500">{restaurant.UserTypeName}</td>
-      <td className="px-6 py-4 text-sm text-gray-500">{restaurant.RestaurantPhone}</td>
-      <td className="px-6 py-4 text-sm text-gray-500">{restaurant.RestaurantEmail}</td>
-      <td className="px-6 py-4 text-sm text-gray-500">{restaurant.CategoryName}</td>
-      <td className="px-6 py-4 text-sm text-gray-500">{restaurant.RestaurantAddress}</td>
+    <tr key={restaurant.restaurantId} className="hover:bg-gray-50">
+      <td className="px-6 py-4 text-sm font-medium text-gray-900">{restaurant.restaurantId}</td>
+      <td className="px-6 py-4 text-sm text-gray-500">{restaurant.restaurantPhone}</td>
+      <td className="px-6 py-4 text-sm text-gray-500">{restaurant.restaurantEmail}</td>
+      <td className="px-6 py-4 text-sm text-gray-500">{restaurant.categoryName}</td>
+      <td className="px-6 py-4 text-sm text-gray-500">{restaurant.address}</td>
+      <td className="px-6 py-4 text-sm text-gray-500">Active</td> {/* أو حط حسب بياناتك */}
+      <td className="px-6 py-4 text-sm text-gray-500">{restaurant.restaurantName}</td>
       <td className="px-6 py-4 text-right text-sm font-medium">
         <div className="flex justify-end gap-2">
-          <Button size="sm" variant="ghost" onClick={() => onEdit(restaurant.RestaurantId)}>
+          <Button size="sm" variant="ghost" onClick={() => onEdit(restaurant.restaurantId)}>
             <Edit size={16} />
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => onDelete(restaurant.RestaurantId)}>
+          <Button size="sm" variant="ghost" onClick={() => onDelete(restaurant.restaurantId)}>
             <Trash2 size={16} />
           </Button>
         </div>
@@ -98,6 +99,7 @@ const RestaurantsTable: React.FC<RestaurantsTableProps> = ({
     </tr>
   ))}
 </tbody>
+
         </table>
       </div>
     </>

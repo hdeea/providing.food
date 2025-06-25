@@ -89,11 +89,9 @@ const BeneficiariesPage: React.FC = () => {
       });
     }
   };
+const handleDelete = (id: number) => {
+  setBeneficiaries((prev) => prev.filter((b) => b.beneficiaryId !== id));
 
-  const handleDelete = (id: number) => {
-    // إضافة طلب حذف للسيرفر هنا لو موجود API للحذف
-
-    setBeneficiaries(beneficiaries.filter((b) => b.beneficiaryId !== id));
     toast({
       title: 'Deleted',
       description: 'Beneficiary deleted successfully.',

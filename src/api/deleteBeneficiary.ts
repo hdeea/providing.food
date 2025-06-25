@@ -1,5 +1,6 @@
+// src/api/deleteBeneficiary.ts
 export const deleteBeneficiary = async (id: number) => {
-  const response = await fetch(/api/Beneficiary/delete/${id}, {
+  const response = await fetch(`/api/Beneficiary/delete/${id}`, {
     method: 'DELETE',
   });
 

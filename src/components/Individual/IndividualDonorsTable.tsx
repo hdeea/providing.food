@@ -1,32 +1,30 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { IndividualDonor } from '../../types/individual';
-import { formatDateTime } from '../../utils/helpers';
-import { Heart, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, Utensils, User } from 'lucide-react';
+import { DonationIndividualDto } from '../../types/individual';
+import { Heart, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 interface IndividualDonorsTableProps {
-  donors: IndividualDonor[];
-  onStatusChange: (donorId: string, newStatus: 'approved' | 'rejected') => void;
+  donors: DonationIndividualDto[];
+  onStatusChange: (donorId: number, newStatus: 'Approved' | 'Rejected') => void;
 }
 
-const IndividualDonorsTable: React.FC<IndividualDonorsTableProps> = ({ 
-  donors, 
-  onStatusChange 
-}) => {
+
+const IndividualDonorsTable: React.FC<IndividualDonorsTableProps> = ({ donors, onStatusChange }) => {
+
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'approved':
+    const capitalStatus = status.charAt(0).toUpperCase() + status.slice(1);
+    switch (capitalStatus) {
+      case 'Approved':
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
             <CheckCircle className="w-3 h-3 mr-1" />
             مقبول
           </Badge>
         );
-      case 'rejected':
+      case 'Rejected':
         return (
           <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
             <XCircle className="w-3 h-3 mr-1" />
@@ -62,86 +60,49 @@ const IndividualDonorsTable: React.FC<IndividualDonorsTableProps> = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>رقم الطلب</TableHead>
-                  <TableHead>نوع المستخدم</TableHead>
-                  <TableHead>البريد الإلكتروني</TableHead>
-                  <TableHead>العنوان</TableHead>
+                  <TableHead>Food ID</TableHead>
                   <TableHead>اسم الطعام</TableHead>
+                  <TableHead>الوصف</TableHead>
+                  <TableHead>العنوان</TableHead>
                   <TableHead>نباتي</TableHead>
                   <TableHead>الحالة</TableHead>
-                  <TableHead>تاريخ الطلب</TableHead>
                   <TableHead>الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {donors.map((donor) => (
-                  <TableRow key={donor.id}>
-                    <TableCell className="font-medium">{donor.id}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        {donor.name}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4" />
-                        {donor.email}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        {donor.address}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Utensils className="w-4 h-4" />
-                        {donor.foodDescription || '-'}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {donor.foodDescription?.includes('(Vegetarian)') ? (
-                        <Badge className="bg-green-100 text-green-800">
-                          نعم
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-gray-100 text-gray-800">
-                          لا
-                        </Badge>
-                      )}
-                    </TableCell>
+                  <TableRow key={donor.foodId}>
+                    <TableCell>{donor.foodId}</TableCell>
+                    <TableCell>{donor.foodName}</TableCell>
+                    <TableCell>{donor.description || '-'}</TableCell>
+                    <TableCell>{donor.country}</TableCell>
+                    <TableCell>{donor.vegetarian ? 'نعم' : 'لا'}</TableCell>
                     <TableCell>{getStatusBadge(donor.status)}</TableCell>
-                    <TableCell>{formatDateTime(donor.createdAt)}</TableCell>
                     <TableCell>
-                      {donor.status === 'pending' && (
+                   {donor.status === 'Pending' && (
+
                         <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700 text-white"
-                            onClick={() => onStatusChange(donor.id, 'approved')}
-                          >
+                        <Button
+  size="sm"
+  className="bg-green-600 hover:bg-green-700 text-white"
+  onClick={() => onStatusChange(donor.requesId, 'Approved')} // ✅
+>
+
                             <CheckCircle className="w-3 h-3 mr-1" />
                             قبول
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => onStatusChange(donor.id, 'rejected')}
-                          >
+                        <Button
+  size="sm"
+  variant="destructive"
+  onClick={() => onStatusChange(donor.requesId, 'Rejected')} // ✅
+>
+
                             <XCircle className="w-3 h-3 mr-1" />
                             رفض
                           </Button>
                         </div>
                       )}
-                      {donor.status !== 'pending' && (
-                        <span className="text-sm text-gray-500">
-                          {donor.reviewedAt && `تمت المراجعة: ${formatDateTime(donor.reviewedAt)}`}
-                        </span>
-                      )}
                     </TableCell>
-                    
                   </TableRow>
                 ))}
               </TableBody>

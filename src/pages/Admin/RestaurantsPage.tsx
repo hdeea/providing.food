@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,8 +7,8 @@ import RestaurantsTable from '../../components/Restaurants/RestaurantsTable';
 import RestaurantForm from '../../components/Restaurants/RestaurantForm';
 import { Restaurant } from '../../types';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
 import { getRestaurants } from '@/api/getRestaurant';
+import { deleteRestaurant } from '@/api/deleteRestaurant';
 
 const RestaurantsPage: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -15,24 +16,22 @@ const RestaurantsPage: React.FC = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | undefined>(undefined);
   const { toast } = useToast();
 
-  // ** هنا بنضيف useEffect لجلب البيانات **
-useEffect(() => {
-  const fetchRestaurants = async () => {
-    try {
-      const data = await getRestaurants();
-      setRestaurants(data);
-    } catch (error) {
-      toast({
-        title: "خطأ في جلب البيانات",
-        description: "فشل في تحميل بيانات المطاعم.",
-        variant: "destructive"
-      });
-      console.error(error);
-    }
-  };
-
-  fetchRestaurants();
-}, []);
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const data = await getRestaurants();
+        setRestaurants(data);
+      } catch (error) {
+        toast({
+          title: 'خطأ في جلب البيانات',
+          description: 'فشل في تحميل بيانات المطاعم.',
+          variant: 'destructive',
+        });
+        console.error(error);
+      }
+    };
+    fetchRestaurants();
+  }, []);
 
   const handleOpenForm = () => {
     setSelectedRestaurant(undefined);
@@ -43,50 +42,62 @@ useEffect(() => {
     setIsFormOpen(false);
     setSelectedRestaurant(undefined);
   };
+const handleEdit = (userId: number) => {
+  const selected = restaurants.find(r => r.userId === userId);
+  if (selected) {
+    setSelectedRestaurant(selected);
+    setIsFormOpen(true);
+  }
+};
 
-  const handleEdit = (RestaurantId: number) => {
-    const selected = restaurants.find((r) => r.RestaurantId === RestaurantId);
-    if (selected) {
-      setSelectedRestaurant(selected);
-      setIsFormOpen(true);
-    }
-  };
 
   const handleSave = (restaurantData: Partial<Restaurant>) => {
-    if (selectedRestaurant) {
-      setRestaurants(
-        restaurants.map((r) =>
-          r.restaurantId === selectedRestaurant.restaurantId
-            ? { ...r, ...restaurantData, updatedAt: new Date().toISOString() }
-            : r
-        )
-      );
+  if (selectedRestaurant) {
+    setRestaurants(
+      restaurants.map(r =>
+        r.userId === selectedRestaurant.userId
+          ? { ...r, ...restaurantData }
+          : r
+      )
+    );
     } else {
       const newRestaurant: Restaurant = {
-        RestaurantId: restaurants.length + 1,
-        CategoryId: restaurantData.CategoryId || 0,
-        UserId: restaurantData.UserId || undefined,
-        RestaurantName: restaurantData.RestaurantName || "",
-        RestaurantEmail: restaurantData.RestaurantEmail || "",
-        RestaurantPhone: restaurantData.RestaurantPhone || "",
-        RestaurantAddress: restaurantData.RestaurantAddress || "",
-        UserTypeName: restaurantData.UserTypeName || "",
-        restaurantId: function (restaurantId: any): void {
-          throw new Error('Function not implemented.');
-        },
-        FullName: '',
-        Email: '',
-        Password: '',
-        PhoneNumber: ''
+        restaurantId: restaurants.length + 1,
+        categoryId: restaurantData.categoryId || 0,
+        userId: restaurantData.userId || 0,
+        restaurantName: restaurantData.restaurantName || '',
+        restaurantEmail: restaurantData.restaurantEmail || '',
+        restaurantPhone: restaurantData.restaurantPhone || '',
+        restaurantAddress: restaurantData.restaurantAddress || '',
+        userTypeName: restaurantData.userTypeName || 'Resturant',
+        fullName: restaurantData.fullName || '',
+        email: restaurantData.email || '',
+        password: restaurantData.password || '',
+        phoneNumber: restaurantData.phoneNumber || '',
+        isActive: true,
+        address: ''
       };
-
       setRestaurants([...restaurants, newRestaurant]);
     }
   };
+  const handleDelete = async (userId: number) => {
+  try {
+    await deleteRestaurant(userId);  // userId هنا
+    setRestaurants(restaurants.filter(r => r.userId !== userId)); // حذف من القائمة بناءً على userId
+    toast({
+      title: 'تم الحذف',
+      description: 'تم حذف المطعم بنجاح.',
+    });
+  } catch (error) {
+    toast({
+      title: 'خطأ',
+      description: 'فشل حذف المطعم',
+      variant: 'destructive',
+    });
+  }
+};
 
-  const handleDelete = (RestaurantId: number) => {
-    setRestaurants(restaurants.filter((r) => r.RestaurantId !== RestaurantId));
-  };
+
 
   return (
     <DashboardLayout title="Restaurants">
@@ -96,16 +107,11 @@ useEffect(() => {
           <p className="text-gray-500">Manage restaurants that contribute surplus food</p>
         </div>
         <Button onClick={handleOpenForm} className="button-blue">
-          <Plus className="mr-2 h-4 w-4" />
-          إضافة مطعم
+          <Plus className="mr-2 h-4 w-4" /> إضافة مطعم
         </Button>
       </div>
 
-      <RestaurantsTable
-        restaurants={restaurants}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <RestaurantsTable restaurants={restaurants} onEdit={handleEdit} onDelete={handleDelete} />
 
       {isFormOpen && (
         <RestaurantForm

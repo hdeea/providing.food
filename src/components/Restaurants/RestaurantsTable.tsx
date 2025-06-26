@@ -88,10 +88,19 @@ const RestaurantsTable: React.FC<RestaurantsTableProps> = ({
       <td className="px-6 py-4 text-sm text-gray-500">{restaurant.restaurantName}</td>
       <td className="px-6 py-4 text-right text-sm font-medium">
         <div className="flex justify-end gap-2">
-          <Button size="sm" variant="ghost" onClick={() => onEdit(restaurant.restaurantId)}>
+          <Button
+           size="sm"
+            variant="ghost"
+    onClick={() => onEdit(restaurant.userId)}
+              className="text-brand-blue hover:text-brand-blue hover:bg-blue-50"
+              >
             <Edit size={16} />
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => onDelete(restaurant.restaurantId)}>
+          <Button 
+          size="sm" 
+          variant="ghost" 
+           onClick={() => onDelete(restaurant.userId!)}  
+            className="text-red-500 hover:text-red-700 hover:bg-red-50">
             <Trash2 size={16} />
           </Button>
         </div>

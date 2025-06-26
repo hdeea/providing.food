@@ -53,12 +53,13 @@ const BeneficiaryForm: React.FC<BeneficiaryFormProps> = ({
 
   const form = useForm<FormData>({
     resolver: zodResolver(beneficiarySchema),
-    defaultValues: {
-      fullName: initialData.fullName || '',
-      phoneNumber: initialData.phoneNumber || '',
-      familySize: initialData.familySize || 1,
-      isActive: initialData.isActive ?? true,
-    },
+defaultValues: {
+  fullName: initialData?.fullName || '',
+  phoneNumber: initialData?.phoneNumber || '',
+  familySize: initialData?.familySize || 1,
+  isActive: initialData?.isActive ?? true,
+},
+
   });
 const onSubmit = async (data: FormData) => {
   try {

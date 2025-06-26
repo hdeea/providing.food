@@ -3,16 +3,16 @@ import { Restaurant } from '@/types/index';
 export const addRestaurant = async (restaurant: Restaurant) => {
   // جهزي البايلود بالاسماء اللي بدها ياها الـ DTO بالباك اند
   const payload = {
-    FullName: restaurant.FullName,
-    Email: restaurant.Email,
-    Password: restaurant.Password,
-    PhoneNumber: restaurant.PhoneNumber,
+    FullName: restaurant.fullName,
+    Email: restaurant.email,
+    Password: restaurant.password,
+    PhoneNumber: restaurant.phoneNumber,
     UserTypeName: 'Resturant',  // حطيتها ثابتة مثل ما اتفقنا
-    RestaurantName: restaurant.RestaurantName,
-    RestaurantEmail: restaurant.RestaurantEmail,
-    RestaurantPhone: restaurant.RestaurantPhone,
-    RestaurantAddress: restaurant.RestaurantAddress,
-    CategoryName: restaurant.CategoryName ?? 'General', // كمان حطيت افتراضي لو فاضي
+    RestaurantName: restaurant.restaurantName,
+    RestaurantEmail: restaurant.restaurantEmail,
+    RestaurantPhone: restaurant.restaurantPhone,
+    RestaurantAddress: restaurant.restaurantAddress,
+    CategoryName: restaurant.categoryName ?? 'General', // كمان حطيت افتراضي لو فاضي
   };
 
   try {

@@ -1,7 +1,7 @@
-import { Beneficiary } from '../types';
+import { Beneficiary } from "@/types";
 
 export const updateBeneficiary = async (beneficiary: Beneficiary) => {
-  const response = await fetch('/api/Beneficiary/update', {
+  const response = await fetch(`/api/Beneficiary/update`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -10,7 +10,7 @@ export const updateBeneficiary = async (beneficiary: Beneficiary) => {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to update beneficiary');
+    throw new Error('فشل التعديل');
   }
 
   return await response.json();

@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 // User types
 export interface CreateAccount {
   fullName: string;
@@ -13,15 +15,24 @@ export interface User {
   role: "admin" | "restaurant" | "individual"; 
 }
 
-export interface Restaurant {
+
+export type Restaurant = {
+  address: ReactNode;
   restaurantId: number;
   restaurantName: string;
-  restaurantPhone: string;
   restaurantEmail: string;
-  categoryName: string;
-  address: string;
-  userId: string;
-}
+  restaurantPhone: string;
+  restaurantAddress: string;
+  userTypeName: string;
+  categoryId: number;
+  categoryName?: string;
+  userId?: number;
+  fullName: string;
+  email: string;
+  password: string;
+  phoneNumber: string;
+  isActive?: boolean;
+};
 
 
 export interface Beneficiary {

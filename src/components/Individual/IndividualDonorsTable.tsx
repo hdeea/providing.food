@@ -85,7 +85,8 @@ const IndividualDonorsTable: React.FC<IndividualDonorsTableProps> = ({ donors, o
                         <Button
   size="sm"
   className="bg-green-600 hover:bg-green-700 text-white"
-  onClick={() => onStatusChange(donor.requesId, 'Approved')} // ✅
+onClick={() => onStatusChange(donor.requesId, 'Approved')}
+
 >
 
                             <CheckCircle className="w-3 h-3 mr-1" />
@@ -94,7 +95,7 @@ const IndividualDonorsTable: React.FC<IndividualDonorsTableProps> = ({ donors, o
                         <Button
   size="sm"
   variant="destructive"
-  onClick={() => onStatusChange(donor.requesId, 'Rejected')} // ✅
+onClick={() => onStatusChange(donor.requesId, 'Rejected')}
 >
 
                             <XCircle className="w-3 h-3 mr-1" />

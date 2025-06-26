@@ -12,6 +12,7 @@ export interface DonationIndividualDto {
   userType?: string;
   reviewedAt?: string;
   id?: number; // للفرونت فقط
+  
 }
 
 

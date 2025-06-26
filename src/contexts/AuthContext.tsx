@@ -4,53 +4,66 @@ import { User } from "../types";
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<User | null>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
-const login = async (email: string, password: string) => {
+  
+useEffect(() => {
+  const storedUser = sessionStorage.getItem("user");
+  if (storedUser) {
+    setUser(JSON.parse(storedUser));
+  }
+  setIsLoading(false);
+}, []);
+const login = async (email: string, password: string): Promise<User | null> => {
   try {
-    const response = await fetch("/api/Auth/login", {
+    const response = await fetch("/api/User/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
 
-    if (!response.ok) {
-      console.error("فشل تسجيل الدخول");
-      return false;
-    }
+    if (!response.ok) return null;
 
     const data = await response.json();
-    setUser(data);
-    localStorage.setItem("user", JSON.stringify(data));
-    return true;
+let role: "admin" | "restaurant" | "individual" = "individual";
 
-  } catch (error) {
-    console.error("خطأ أثناء تسجيل الدخول:", error);
-    return false;
+if (data.userTypeId === 2) {
+  role = "admin";
+} else if (data.userTypeId === 3) {
+  role = "restaurant";
+} else {
+  return null; // غير مسموح
+}
+
+
+    const mappedUser: User = {
+      id: data.userId,
+      fullName: data.fullName,
+     role: "admin",
+      token: data.token,
+    };
+
+    setUser(mappedUser);
+    sessionStorage.setItem("user", JSON.stringify(mappedUser));
+    sessionStorage.setItem("justLoggedIn", "true");
+
+    return mappedUser;
+  } catch {
+    return null;
   }
 };
 
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
   };
 
   return (

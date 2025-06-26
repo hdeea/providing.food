@@ -9,11 +9,12 @@ export interface CreateAccount {
 }
 
 export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "admin" | "restaurant" | "individual"; 
+  id: number;
+  fullName: string;
+  role: "admin" | "restaurant" | "individual";
+  token: string;
 }
+
 
 
 export type Restaurant = {

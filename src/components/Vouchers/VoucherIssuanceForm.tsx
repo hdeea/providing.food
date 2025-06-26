@@ -10,6 +10,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { VoucherIssuance } from '../../types/individual';
 import { Gift } from 'lucide-react';
+import { createFoodBond } from '@/api/foodVoucher/createVoucher';
+
 const voucherSchema = z.object({
   beneficiaryName: z.string().min(1, 'Beneficiary name is required'),
   restaurantName: z.string().min(1, 'Restaurant name is required'),
@@ -36,47 +38,45 @@ const VoucherIssuanceForm: React.FC<VoucherIssuanceFormProps> = ({ onVoucherIssu
       validHours: 24,
     },
   });
+const onSubmit = async (data: FormData) => {
+  try {
+    setIsSubmitting(true);
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      setIsSubmitting(true);
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      const validUntil = new Date();
-      validUntil.setHours(validUntil.getHours() + data.validHours);
-      
-      const newVoucher: VoucherIssuance = {
-        id: `V${Date.now()}`,
-        beneficiaryId: data.beneficiaryName,
-        restaurantId: data.restaurantName,
-        issuedBy: 'admin',
-        mealCount: data.mealCount,
-        validUntil: validUntil.toISOString(),
-        qrCode: `QR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        status: 'active',
-        createdAt: new Date().toISOString(),
-      };
-      
-      onVoucherIssued(newVoucher);
-      form.reset();
-      
-      toast({
-        title: "Voucher issued successfully",
-        description: `Food voucher issued for ${data.beneficiaryName} with ${data.mealCount} meals valid for ${data.validHours} hours`,
-      });
-      
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred while issuing the voucher",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    const validUntil = new Date();
+    validUntil.setHours(validUntil.getHours() + data.validHours);
+
+    const newVoucher: VoucherIssuance = {
+      id: `V${Date.now()}`,
+      beneficiaryId: data.beneficiaryName,
+      restaurantId: data.restaurantName,
+      issuedBy: 'admin',
+      mealCount: data.mealCount,
+      validUntil: validUntil.toISOString(),
+      qrCode: `QR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+    };
+
+    const createdVoucher = await createFoodBond(newVoucher); // ✅ صار بعد تعريف newVoucher
+    onVoucherIssued(createdVoucher);
+    form.reset();
+
+    toast({
+      title: "Voucher issued successfully",
+      description: `Food voucher issued for ${data.beneficiaryName} with ${data.mealCount} meals valid for ${data.validHours} hours`,
+    });
+
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "An error occurred while issuing the voucher",
+      variant: "destructive",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <Card>

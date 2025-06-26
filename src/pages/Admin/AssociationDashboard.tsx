@@ -3,6 +3,8 @@ import DashboardLayout from '../../components/Layout/DashboardLayout';
 import VouchersList from '../../components/Vouchers/VouchersList';
 import IndividualRequestsTable from '../../components/Individual/IndividualRequestsTable';
 import IndividualDonorsTable from '../../components/Individual/IndividualDonorsTable';
+import VoucherIssuanceForm from '../../components/Vouchers/VoucherIssuanceForm';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -13,9 +15,11 @@ import { updateDonationStatus } from '../../api/updateDonationStatus';
 
 const AssociationDashboard: React.FC = () => {
   const [vouchers, setVouchers] = useState<VoucherIssuance[]>([]);
+  const [showForm, setShowForm] = useState(false);
   const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
   const [donors, setDonors] = useState<DonationIndividualDto[]>([]);
   const { toast } = useToast();
+
 
   useEffect(() => {
     const fetchDonations = async () => {
@@ -33,29 +37,21 @@ const AssociationDashboard: React.FC = () => {
 
     fetchDonations();
   }, []);
-const handleDonorStatusChange = async (
-  donorId: number,
+  
+  const handleDonorStatusChange = async (
+  requestId: number, // هذا لازم يكون requesId، مو foodId
   newStatus: 'Approved' | 'Rejected'
 ) => {
-  const donor = donors.find(d => d.foodId === donorId);
+  const donor = donors.find(d => d.requesId === requestId); // صحح البحث
+
   if (!donor) return;
 
   try {
-    await updateDonationStatus({
-      foodId: donor.foodId,
-      foodName: donor.foodName,
-      description: donor.description,
-      country: donor.country,
-      vegetarian: donor.vegetarian,
-      userEmail: donor.userEmail,
-      image: donor.image,
-      userType: donor.userType,
-      status: newStatus,
-    });
+    await updateDonationStatus(donor.requesId, newStatus);
 
     setDonors(prev =>
       prev.map(d =>
-        d.foodId === donorId ? { ...d, status: newStatus } : d
+        d.requesId === requestId ? { ...d, status: newStatus } : d
       )
     );
 
@@ -151,14 +147,24 @@ const handleDonorStatusChange = async (
               onStatusChange={handleDonorStatusChange}
             />
           </TabsContent>
+<TabsContent value="vouchers" className="space-y-6">
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    {/* القائمة */}
+    <div className="lg:col-span-2">
+      <VouchersList vouchers={vouchers} />
+    </div>
 
-          <TabsContent value="vouchers" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <VouchersList vouchers={vouchers} />
-              </div>
-            </div>
-          </TabsContent>
+    {/* فورم إصدار سند جديد */}
+    <div>
+      <VoucherIssuanceForm
+        onVoucherIssued={(newVoucher) => {
+          setVouchers((prev) => [newVoucher, ...prev]);
+        }}
+      />
+    </div>
+  </div>
+</TabsContent>
+
         </Tabs>
       </div>
     </DashboardLayout>

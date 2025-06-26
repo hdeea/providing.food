@@ -44,23 +44,23 @@ const TopBar: React.FC<TopBarProps> = ({ toggleSidebar }) => {
 
       <div className="flex items-center gap-4">
         <span className="text-sm text-gray-700 hidden md:block">
-          {user?.name || 'User'}
+          {user?.fullName || 'Admin'}
         </span>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="cursor-pointer">
               <AvatarFallback className="bg-brand-blue text-white">
-                {user?.name?.charAt(0) || 'U'}
+                {user?.fullName?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>حسابي</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+              <span>تسجيل خروج</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

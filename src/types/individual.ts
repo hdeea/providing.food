@@ -1,8 +1,7 @@
-// ✅ types/individual.ts
 export interface DonationIndividualDto {
-  requesId: number;  // ID الطلب من السيرفر
-  foodId: number;    // ✅ لازم يكون رقم
-  status: 'Pending' | 'Approved' | 'Rejected';  // ✅ حرف كبير
+  requesId: number;  
+  foodId: number;    
+  status: 'Pending' | 'Approved' | 'Rejected';  
   foodName: string;
   description: string;
   image: string;
@@ -11,8 +10,7 @@ export interface DonationIndividualDto {
   userEmail?: string;
   userType?: string;
   reviewedAt?: string;
-  id?: number; // للفرونت فقط
-  
+  id?: number; // للفرونت فقط 
 }
 
 
@@ -30,6 +28,12 @@ export interface DonationTransaction {
   createdAt: string;
   processedAt?: string;
 }
+export interface VoucherRequest {
+  beneficiaryName: string;
+  restaurantName: string;
+  numberOfMeals: number;
+  expiryDate: string;
+};
 
 // Help request from needy individuals (renamed for clarity)
 export interface HelpRequest {
@@ -48,16 +52,16 @@ export interface HelpRequest {
 
 // Food voucher issuance type
 export interface VoucherIssuance {
-  id: string;
-  beneficiaryId: string;
-  restaurantId: string;
-  issuedBy: string;
-  mealCount: number;
-  validUntil: string;
+  id: number;
+  beneficiaryName: string;
+  restaurantName: string;
+  numberOfMeals: number;
   qrCode: string;
-  status: 'active' | 'used' | 'expired';
   createdAt: string;
+  expiryDate: string;
+  statusName: string;
 }
+
 export interface ScanResult {
   success: boolean;
   bond: VoucherIssuance;

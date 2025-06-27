@@ -71,18 +71,18 @@ const VouchersList: React.FC<VouchersListProps> = ({ vouchers }) => {
                 {vouchers.map((voucher) => (
                   <TableRow key={voucher.id}>
                     <TableCell className="font-medium">{voucher.id}</TableCell>
-                    <TableCell>{voucher.beneficiaryId}</TableCell>
-                    <TableCell>{voucher.restaurantId}</TableCell>
-                    <TableCell>{voucher.mealCount} وجبات</TableCell>
-                    <TableCell>{getStatusBadge(voucher.status)}</TableCell>
-                    <TableCell>{formatDateTime(voucher.createdAt)}</TableCell>
-                    <TableCell>{formatDateTime(voucher.validUntil)}</TableCell>
-                    <TableCell>
-<div className="flex justify-center">
-  <QRCode value={voucher.qrCode} size={256} />
-</div>
+       <TableCell>{voucher.beneficiaryName}</TableCell>
+<TableCell>{voucher.restaurantName}</TableCell>
+<TableCell>{voucher.numberOfMeals} وجبات</TableCell>
+<TableCell>{getStatusBadge(voucher.statusName)}</TableCell>
+<TableCell>{formatDateTime(voucher.createdAt)}</TableCell>
+<TableCell>{formatDateTime(voucher.expiryDate)}</TableCell>
+<TableCell>
+  <div className="flex justify-center">
+    <QRCode value={voucher.qrCode} size={256} />
+  </div>
+</TableCell>
 
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

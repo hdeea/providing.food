@@ -1,6 +1,8 @@
-import { VoucherIssuance } from "@/types/individual";
+// ✅ بعد:
+import { VoucherRequest } from '@/types/individual';
 
-export const createFoodBond = async (voucher: VoucherIssuance) => {
+export const createFoodBond = async (voucher: VoucherRequest) => {
+
   try {
     const response = await fetch("/api/FoodBond", {
       method: "POST",

@@ -4,7 +4,6 @@ import VouchersList from '../../components/Vouchers/VouchersList';
 import IndividualRequestsTable from '../../components/Individual/IndividualRequestsTable';
 import IndividualDonorsTable from '../../components/Individual/IndividualDonorsTable';
 import VoucherIssuanceForm from '../../components/Vouchers/VoucherIssuanceForm';
-
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +11,7 @@ import { VoucherIssuance, HelpRequest, DonationIndividualDto } from '../../types
 import { Heart, Ticket, Users, UserPlus } from 'lucide-react';
 import { getIndividualDonations } from '../../api/getDonationIndividuals';
 import { updateDonationStatus } from '../../api/updateDonationStatus';
+
 
 const AssociationDashboard: React.FC = () => {
   const [vouchers, setVouchers] = useState<VoucherIssuance[]>([]);
@@ -31,7 +31,7 @@ const AssociationDashboard: React.FC = () => {
         }));
         setDonors(dataWithId);
       } catch (error) {
-        console.error("❌ Failed to fetch individual donations:", error);
+        console.error("Failed to fetch individual donations:", error);
       }
     };
 
@@ -39,10 +39,10 @@ const AssociationDashboard: React.FC = () => {
   }, []);
   
   const handleDonorStatusChange = async (
-  requestId: number, // هذا لازم يكون requesId، مو foodId
+  requestId: number, 
   newStatus: 'Approved' | 'Rejected'
 ) => {
-  const donor = donors.find(d => d.requesId === requestId); // صحح البحث
+  const donor = donors.find(d => d.requesId === requestId);
 
   if (!donor) return;
 
@@ -64,13 +64,12 @@ const AssociationDashboard: React.FC = () => {
 };
 
 
-
   function handleHelpRequestStatusChange(requesId: string, newStatus: 'approved' | 'rejected'): void {
     throw new Error('Function not implemented.');
   }
 
   return (
-    <DashboardLayout title="Association Dashboard">
+    <DashboardLayout title="لوحــة تحكم الجمعيــة">
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
@@ -78,7 +77,7 @@ const AssociationDashboard: React.FC = () => {
               <div className="flex items-center">
                 <Ticket className="h-8 w-8 text-blue-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Vouchers</p>
+                  <p className="text-sm font-medium text-gray-600">أجمــالي السنــدات الغـذائية</p>
                   <p className="text-2xl font-bold text-gray-900">{vouchers.length}</p>
                 </div>
               </div>
@@ -89,7 +88,7 @@ const AssociationDashboard: React.FC = () => {
               <div className="flex items-center">
                 <Users className="h-8 w-8 text-green-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Help Requests</p>
+                  <p className="text-sm font-medium text-gray-600">طلبــات المســاعدة</p>
                   <p className="text-2xl font-bold text-gray-900">{helpRequests.length}</p>
                 </div>
               </div>
@@ -100,7 +99,7 @@ const AssociationDashboard: React.FC = () => {
               <div className="flex items-center">
                 <Heart className="h-8 w-8 text-red-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Donation Requests</p>
+                  <p className="text-sm font-medium text-gray-600">طلبــات التبرع</p>
                   <p className="text-2xl font-bold text-gray-900">{donors.length}</p>
                 </div>
               </div>
@@ -111,7 +110,7 @@ const AssociationDashboard: React.FC = () => {
               <div className="flex items-center">
                 <UserPlus className="h-8 w-8 text-purple-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Pending Reviews</p>
+                  <p className="text-sm font-medium text-gray-600">المراجعات المعلّقة</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {[...helpRequests, ...donors].filter(r => r.status === 'pending').length}
                   </p>
@@ -124,13 +123,13 @@ const AssociationDashboard: React.FC = () => {
         <Tabs defaultValue="vouchers" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="vouchers" className="flex items-center gap-2">
-              <Ticket className="w-4 h-4" /> Food Vouchers
+              <Ticket className="w-4 h-4" /> السنــدات الغذائية
             </TabsTrigger>
             <TabsTrigger value="help-requests" className="flex items-center gap-2">
-              <Users className="w-4 h-4" /> Help Requests
+              <Users className="w-4 h-4" /> طلبــات المساعدة
             </TabsTrigger>
             <TabsTrigger value="donations" className="flex items-center gap-2">
-              <Heart className="w-4 h-4" /> Donation Requests
+              <Heart className="w-4 h-4" /> طلبــات التبرع 
             </TabsTrigger>
           </TabsList>
 
@@ -149,12 +148,11 @@ const AssociationDashboard: React.FC = () => {
           </TabsContent>
 <TabsContent value="vouchers" className="space-y-6">
   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    {/* القائمة */}
+   
     <div className="lg:col-span-2">
       <VouchersList vouchers={vouchers} />
     </div>
 
-    {/* فورم إصدار سند جديد */}
     <div>
       <VoucherIssuanceForm
         onVoucherIssued={(newVoucher) => {

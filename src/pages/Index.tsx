@@ -90,7 +90,7 @@ const Index = () => {
             </CardHeader>
             <CardContent>
             
-<Link to="/restaurant/login">  {/* تغيير المسار هنا */}
+<Link to="/restaurant/login">  
   <Button className="w-full bg-purple-600 hover:bg-purple-700">
     دخول المطاعم
   </Button>
@@ -98,7 +98,6 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          {/* Admin Dashboard */}
           <Card className="text-center hover:shadow-lg transition-shadow">
             <CardHeader>
               <Users className="w-12 h-12 text-blue-600 mx-auto mb-4" />
